@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports =
@@ -11,9 +11,9 @@
     ];
 
   boot.kernel.sysctl = {
-    "net.ipv4.ip_default_ttl" = "65"; # Включить маршрутизацию IPv4
+     "net.ipv4.ip_default_ttl" = "65";
   };
-
+  
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -28,23 +28,23 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # # Enable XorgServer
+  services.xserver.enable = true;
+
+  services.xserver.windowManager.xmonad = {
+     enable = true;
+     enableContribAndExtras = true;
+  };
+
+  # Enable lightdm
+  services.xserver.displayManager.lightdm.enable = true;
+  services.xserver.windowManager.xmonad.config = builtins.readFile /home/dima/.xmonad/config.hs;
+
   # Set your time zone.
   time.timeZone = "Europe/Minsk";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  services.xserver.windowManager.xmonad = {
-    enable = true;
-    enableContribAndExtras = true;
-  };
-
-  # Enable the XFCE Desktop Environment.
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.windowManager.xmonad.config = builtins.readFile /home/dima/.xmonad/config.hs;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -52,10 +52,6 @@
     variant = "";
   };
 
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
-
-  # Enable sound with pipewire.
   hardware.bluetooth.enable =  true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -72,50 +68,13 @@
     #media-session.enable = true;
   };
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-  programs.fish.enable = true; 
-  users.defaultUserShell = pkgs.fish; 
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.dima = {
     isNormalUser = true;
     description = "dima";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-    #  thunderbird
-	emacs
-	rxvt-unicode
-	flameshot
-	rofi
-	wget
-	chromium
-	unzip
-	git
-	vim
-	bluez
-	ranger
-	btop
-	xmonad-with-packages
-	terminus_font
-	haskellPackages.xmonad
-	feh
-	chromium
-	picom-pijulius
-	polybarFull	
-	pulseaudio
-	telegram-desktop
-	llvmPackages_19.clang-tools
-	wpsoffice
-	dotnetCorePackages.dotnet_8.sdk
-	dotnetCorePackages.dotnet_8.runtime
-	fish
-	xorg.xbacklight
-    ];
+    packages = with pkgs; [];
   };
-
-  # Install firefox.
-  # programs.firefox.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -123,10 +82,69 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-	fish
-     # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #  wget
+	gcc11
+	emacs
+	rxvt-unicode
+	git
+	xmonad-with-packages
+	picom-pijulius
+	polybarFull
+	terminus_font
+	rofi
+	chromium
+	pulseaudio
+	unzip
+	wget
+	btop
+	feh
+	jdk17
+	sbcl
+	gnumake
+	nyxt
+	evince
+	ntfs3g
+	openssh
+	moc
+	ranger
+	flameshot
+	telegram-desktop
+	unityhub
   ];
 
+  # Добавляем LD_LIBRARY_PATH
+  environment.variables.LD_LIBRARY_PATH = lib.makeLibraryPath [
+     pkgs.glib
+     pkgs.gdk-pixbuf
+     pkgs.cairo
+     pkgs.pango
+     pkgs.gtk3
+     pkgs.SDL2
+     pkgs.SDL2_ttf
+     pkgs.SDL2_net
+     pkgs.SDL2_gfx
+     pkgs.SDL2_sound
+     pkgs.SDL2_mixer
+     pkgs.SDL2_image
+     pkgs.SDL2_Pango
+     pkgs.llvmPackages_19.clang-tools
+     pkgs.SDL
+     pkgs.libgcc
+  ];
+
+  services.openssh = {
+  enable = true;
+  ports = [ 22 ];
+  settings = {
+    PasswordAuthentication = true;
+    AllowUsers = null; # Allows all users by default. Can be [ "user1" "user2" ]
+    UseDns = true;
+    X11Forwarding = false;
+    PermitRootLogin = "prohibit-password"; # "yes", "without-password", "prohibit-password", "forced-commands-only",   "no"
+    };
+  };
+  
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -134,7 +152,6 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
@@ -153,4 +170,5 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
+
 }
