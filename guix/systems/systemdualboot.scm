@@ -6,8 +6,6 @@
 ;; to the 'guix system reconfigure' command to effect your
 ;; changes.
 
-;; Indicate which modules to import to access the variables
-;; used in this configuration.
 (use-modules (gnu)
              (nongnu packages linux)
              (gnu services xorg)
@@ -24,7 +22,7 @@
   (keyboard-layout (keyboard-layout "us" "altgr-intl"))
   (host-name "guix")
 
-  ;; The list of user accounts ('root' is implicit).
+  ;; Users
   (users (cons* (user-account
                   (name "dima")
                   (comment "Dima")
@@ -33,25 +31,20 @@
                   (supplementary-groups '("wheel" "netdev" "audio" "video")))
                 %base-user-accounts))
 
-  ;; Packages installed system-wide.  Users can also install packages
-  ;; under their own account: use 'guix search KEYWORD' to search
-  ;; for packages and 'guix install PACKAGE' to install a package.
+  ;; Packages
   (packages (append (list (specification->package "i3-wm")
                           (specification->package "openjdk@17.0.10")
-                          (specification->package "openjdk@20.0.2"))
+                          (specification->package "openjdk@21.0.2"))
                     %base-packages))
 
-  ;; Below is the list of system services.  To search for available
-  ;; services, run 'guix system search KEYWORD' in a terminal.
+  ;; Services
   (services
    (append (list (set-xorg-configuration
                    (xorg-configuration (keyboard-layout keyboard-layout)))
-                 ;; This is the default list of services we
-                 ;; are appending to.
                  (service bluetooth-service-type))
            %desktop-services))
 
-  ;; Bootloader configuration with dual boot support for Windows
+  ;; Bootloader
   (bootloader (bootloader-configuration
                (bootloader grub-efi-bootloader)
                (targets (list "/boot/efi"))
@@ -65,20 +58,20 @@
                   (initrd "/gnu/store/...-linux-initrd/initrd")
                   (device (uuid "f5908e11-e4c3-4985-b288-84f9d544929e")))
 
-                 ;; Entry for Windows
+                 ;; Entry for Windows using chain-loader
                  (menu-entry
                   (label "Windows Boot Manager")
-                  (linux "/EFI/Microsoft/Boot/bootmgfw.efi")
-                  (device (uuid "14C8-34BC")))))))
+                  (chain-loader "/EFI/Microsoft/Boot/bootmgfw.efi") ;; Используем chain-loader
+                  (device (uuid "14C8-34BC" 'fat32))))))) ;; Указываем EFI раздел
 
-  ;; Mapped devices for encrypted root partition
+  ;; Mapped devices
   (mapped-devices (list (mapped-device
                           (source (uuid
                                    "f5908e11-e4c3-4985-b288-84f9d544929e"))
                           (target "guix")
                           (type luks-device-mapping))))
 
-  ;; File systems configuration
+  ;; File systems
   (file-systems (cons* (file-system
                          (mount-point "/")
                          (device "/dev/mapper/guix")
@@ -86,6 +79,5 @@
                          (dependencies mapped-devices))
                        (file-system
                          (mount-point "/boot/efi")
-                         (device (uuid "14C8-34BC"
-                                       'fat32))
+                         (device (uuid "14C8-34BC" 'fat32)) ;; Используем короткий UUID
                          (type "vfat")) %base-file-systems)))
