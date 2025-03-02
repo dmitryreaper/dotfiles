@@ -33,7 +33,6 @@
 
   ;; Packages
   (packages (append (list (specification->package "i3-wm")
-                          (specification->package "openjdk@17.0.10")
                           (specification->package "openjdk@21.0.2"))
                     %base-packages))
 
@@ -41,7 +40,9 @@
   (services
    (append (list (set-xorg-configuration
                    (xorg-configuration (keyboard-layout keyboard-layout)))
-                 (service bluetooth-service-type))
+                 (service bluetooth-service-type)
+				 (simple-service 'set-ip-default-ttl sysctl-service-type
+                     `(("net.ipv4.ip_default_ttl" . "65"))))
            %desktop-services))
 
   ;; Bootloader
