@@ -13,7 +13,7 @@
 (setq use-package-always-ensure t)
 
 ;;common-lisp
-(load (expand-file-name "~/quicklisp/slime-helper.el"))
+;;(load (expand-file-name "~/quicklisp/slime-helper.el"))
   ;; Replace "sbcl" with the path to your implementation
   (setq inferior-lisp-program "sbcl")
 
@@ -40,7 +40,7 @@
 (setq-default standart-indent    4)
 
 ;;image in org mode size
-(setq org-image-actual-width 600)
+(setq org-image-actual-width 700)
 
 ;; Set up the visible bell
 (setq visible-bell t)
@@ -50,7 +50,7 @@
 (add-to-list 'default-frame-alist '(cursor-color . "#ffffff"))
 
 ;;font
-(set-face-attribute 'default nil :font "Hack Nerd Font-11")
+(set-face-attribute 'default nil :font "Hack Nerd Font-12")
 
 ;;set "gnu" style for c
 (setq c-deafault-style "linux"
@@ -64,8 +64,8 @@
 (electric-pair-mode 1)
 
 ;; view image in org mode
-(setq org-src-fontify-natively 't)
-(setq org-startup-with-inline-images t)
+;; (setq org-src-fontify-natively 't)
+;; (setq org-startup-with-inline-images t)
 
 ;; Scroll
 (setq scroll-step 1)
@@ -80,10 +80,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Whitespace mode
-(defun rc/set-up-whitespace-handling ()
-  (interactive)
-  (whitespace-mode 1)
-  (add-to-list 'write-file-functions 'delete-trailing-whitespace))
+;; (defun rc/set-up-whitespace-handling ()
+;;   (interactive)
+;;   (whitespace-mode 1)
+;;   (add-to-list 'write-file-functions 'delete-trailing-whitespace))
 
 ;;resize window
 (defun enlarge-vert ()
@@ -165,7 +165,9 @@
   :hook
   (c++-mode . lsp) 
   (java-mode . lsp)
-  (c-mode . lsp))
+  (c-mode . lsp)
+  (csharp-mode . lsp)
+  (lisp-mode . sly))
 
 (use-package lsp-ui
   :ensure t
@@ -200,6 +202,18 @@
   ;;(projects . 5)
   ;;(agenda   . 5)))
   (setq dashboard-banner-logo-title "Welcome to Emacs!"))
+
+
+;; ORGmode
+(use-package org
+  :config
+  (setq org-ellipsis "▾"))
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode))
+  ;;:custom
+  ;;(org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MAPPING;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -256,24 +270,6 @@
 (add-hook 'haskell-literate-mode-hook #'lsp)
 (add-hook 'haskell-interactive-switch #'lsp)
 
-;; whitespace
-(add-hook 'c++-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'c-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'emacs-lisp-mode 'rc/set-up-whitespace-handling)
-(add-hook 'lisp-mode 'rc/set-up-whitespace-handling)
-(add-hook 'java-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'lua-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'rust-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'scala-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'markdown-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'haskell-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'python-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'erlang-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'asm-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'fasm-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'go-mode-hook 'rc/set-up-whitespace-handling)
-(add-hook 'nim-mode-hook 'rc/set-up-whitespace-handling)
-
 ;; line-numbers-mode off 
 (dolist (mode '(org-mode-hook
                 term-mode-hook
@@ -284,6 +280,34 @@
 				nov-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+;; Org Mode Configuration ------------------------------------------------------
+
+(defun efs/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+  ;; Set faces for heading levels
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "Hack Nerd Font" :weight 'regular :height (cdr face)))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (custom-set-variables
@@ -293,11 +317,14 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice (lambda nil (get-buffer "*dashboard*")))
  '(package-selected-packages
-   '(multiple-cursors lsp-haskell haskell-mode annalist company counsel dashboard doom-modeline forge goto-chg gruber-darker-theme helm-core ivy-prescient ivy-rich llm lsp-java lsp-ui org-bullets org-pdftools org-present queue shell-maker wfnames))
+   '(sly multiple-cursors annalist company counsel dashboard doom-modeline forge goto-chg gruber-darker-theme helm-core ivy-prescient ivy-rich llm lsp-java lsp-ui org-bullets org-pdftools org-present queue shell-maker wfnames))
  '(warning-suppress-log-types '((evil-collection))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(cursor ((t (:background "white"))))
+ '(org-block ((t (:inherit white :extend t))))
+ '(org-block-begin-line ((t (:inherit org-meta-line :extend nil))))
+ '(sly-mrepl-output-face ((t (:foreground "green")))))
