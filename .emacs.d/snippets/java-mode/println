@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: println
+# key: s
+# --
+
+System.out.println($1);

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: foreach
+# key: fe
+# --
+for (${1:String} ${2:item} : ${3:collection}) {
+    $0
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: class
+# key: pc
+# --
+public class ${1:ClassName} {
+    $2
+}
