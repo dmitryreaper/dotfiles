@@ -14,14 +14,15 @@
 
 ;;common-lisp
 ;;(load (expand-file-name "~/quicklisp/slime-helper.el"))
-  ;; Replace "sbcl" with the path to your implementation
-  (setq inferior-lisp-program "sbcl")
+;; Replace "sbcl" with the path to your implementation
+(setq inferior-lisp-program "sbcl")
 
 ;;BASIC UI CONFIGURATION
 (setq inhibit-startup-message t)
 (setq initial-buffer-choice nil)
 (setq make-backup-files nil)
 (setq auto-save-default nil)
+(setq org-roam-directory (file-truename "~/OrgRoam/"))
 
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
@@ -196,6 +197,11 @@
   (csharp-mode . lsp)
   (lisp-mode . sly))
 
+(use-package yasnippet
+  :ensure t
+  :hook
+  (java-mode . yas-global-mode))
+
 (use-package lsp-ui
   :ensure t
   :after lsp-mode
@@ -230,21 +236,36 @@
   ;;(agenda   . 5)))
   (setq dashboard-banner-logo-title "Welcome to Emacs!"))
 
-
 ;; ORGmode
 (use-package org
   :config
-  (setq org-ellipsis "▾"))
+  (setq org-ellipsis "▾")
+  :hook
+  (org-mode . yas-global-mode))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((java . t)))
+
+(use-package org-roam
+  :ensure t
+  :config
+  (org-roam-setup))
 
 (use-package org-bullets
   :after org
   :hook (org-mode . org-bullets-mode))
-  ;;:custom
-  ;;(org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+;;:custom
+;;(org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MAPPING;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ORG Roam
+(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
+(global-set-key (kbd "C-c n f") 'org-roam-node-find)
+(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
 
 ;; Move window
 (global-set-key (kbd "C-M-p") 'windmove-up)
@@ -316,8 +337,7 @@
  ;; If there is more than one, they won't work right.
  '(initial-buffer-choice (lambda nil (get-buffer "*dashboard*")))
  '(package-selected-packages
-   '(sly multiple-cursors annalist company counsel dashboard doom-modeline forge goto-chg gruber-darker-theme helm-core ivy-prescient ivy-rich llm lsp-java lsp-ui org-bullets org-pdftools org-present queue shell-maker wfnames))
- '(warning-suppress-log-types '((evil-collection))))
+   '(geiser-guile guix org-roam yasnippet org-babel sly multiple-cursors annalist company counsel dashboard doom-modeline forge goto-chg gruber-darker-theme helm-core ivy-prescient ivy-rich llm lsp-java lsp-ui org-bullets org-pdftools org-present queue shell-maker wfnames)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

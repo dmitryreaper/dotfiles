@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Code Block
+# key: jc
+# --
+
+#+BEGIN_SRC java :results output
+$0			
+#+END_SRC
