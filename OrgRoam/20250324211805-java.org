@@ -1,0 +1,53 @@
+:PROPERTIES:
+:ID:       c30c4d4e-f43e-41e6-9f31-a595e016549b
+:END:
+#+title: Java
+
+* Java ОКР <2024-04-09 Tue>
+** Мониторы
+Каждый объект в Java имеет ассоциированный с ним монитор. Монитор представляет своего рода инструмент для управления доступа к объекту. Когда выполнение кода доходит до оператора synchronized, монитор объекта блокируется, и на время его блокировки монопольный доступ к блоку кода имеет только один поток, который и произвел блокировку. После окончания работы блока кода, монитор объекта освобождается и становится доступным для других потоков.
+
+#+BEGIN_SRC java :results output
+  public class Main {
+	  // Общий ресурс для синхронизации
+	  public static Integer commonRes = 0;
+
+	  public static void main(String[] args) {
+		  for (int i = 0; i < 10; i++) {
+			  int threadNumber = i; // Сохраняем значение i для текущего потока
+			  newThread(() -> {
+					  synchronized (commonRes) { // Синхронизация на ресурсе commonRes
+						  commonRes = 1;
+						  for (int j = 0; j < 5; j++) {
+							  System.out.println(Thread.currentThread().getName() + " " + commonRes);
+						  }
+					  }
+			  }, "Thread0" + threadNumber).start();
+		  }
+	  }
+  }
+#+END_SRC
+
+#+RESULTS:
+
+** Семафоры и мьютексы
+
+У семафора есть 4 метода
+Чтобы создать у нас есть 2 конструктора
+(int prmits) (int permits, boolean fair)
+Методы:
+1) void acquire() throws IE - забирает 1 разрешение уменьшает счетчик на 1
+2) void acquire(int permits) может вызвать IE
+3) void release() - освобожает 1 разрешение увеличивает счетчик на 1
+4) void release(int permits) без throws
+ 
+#+BEGIN_SRC java :results output
+  public class Main {
+	  public static void main(String[] args) {
+		  
+	  }
+  }
+#+END_SRC
+
+
+
