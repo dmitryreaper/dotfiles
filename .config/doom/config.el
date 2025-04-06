@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-ir-black)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -40,10 +40,11 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
 
+(setq org-directory "~/OrgRoam/")
+(setq org-roam-directory (file-truename "~/OrgRoam/"))
 
-;; Whenever you reconfigure a package, make sure to wrap your config in an
+;; whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
 ;;   (after! PACKAGE
@@ -74,3 +75,32 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+;; swiper
+(global-set-key (kbd "C-s") 'swiper)
+
+;; cursor
+(setq blink-cursor-blinks 0)
+(blink-cursor-mode 1)
+
+;;Color cursor
+(set-frame-parameter nil 'cursor-color "#ffffff")
+(add-to-list 'default-frame-alist '(cursor-color . "#ffffff"))
+
+;;font
+(set-face-attribute 'default nil :font "Hack Nerd Font-11")
+
+;;fullscreen
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Scroll
+(setq scroll-step 1)
+(setq scroll-conservatively 10000)
+(setq auto-window-vscroll nil)
+
+;; ORG Roam
+(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
+(global-set-key (kbd "C-c n f") 'org-roam-node-find)
+(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
+
+(add-hook 'org-mode  #'org-bullets-mode)
