@@ -76,6 +76,9 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+;;doom dashboard
+(setq +doom-dashboard-name "emacs")
+(setq +doom-dashboard-banner-file "emacs.png")
 ;; swiper
 (global-set-key (kbd "C-s") 'swiper)
 
@@ -85,7 +88,6 @@
 
 ;;Color cursor
 (set-frame-parameter nil 'cursor-color "#ffffff")
-(add-to-list 'default-frame-alist '(cursor-color . "#ffffff"))
 
 ;;font
 (set-face-attribute 'default nil :font "Hack Nerd Font-11")
@@ -104,3 +106,16 @@
 (global-set-key (kbd "C-c n i") 'org-roam-node-insert)
 
 (add-hook 'org-mode  #'org-bullets-mode)
+
+(defun javac-current-file ()
+  "Compile the current Java file using javac."
+  (interactive)
+  (save-buffer) ; Сохраняем текущий буфер
+  (let ((file (buffer-file-name))) ; Получаем полное имя файла
+    (if (and file (string= (file-name-extension file) "java"))
+        (compile (format "java %s" file)) ; Компилируем файл с расширением .java
+      (message "Not a Java file"))))
+
+(add-hook 'java-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-j") 'javac-current-file)))

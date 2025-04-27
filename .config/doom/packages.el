@@ -50,3 +50,10 @@
 
 (package! org-roam)
 (package! org-bullets)
+(package! org-tree-slide)
+(package! org-present)
+(package! org-reveal)
+(package! org-modern)
+(package! read-aloud)
+(package! djvu)
+(package! fb2-reader)
