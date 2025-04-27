@@ -12,12 +12,13 @@
 
   # Установка пакетов
   home.packages = with pkgs; [
-    emacs
     git
+    zip
+    unzip
     telegram-desktop
     google-chrome
+    libreoffice-qt6-fresh
     wpsoffice
-    unityhub
     spotify
     jdk17
     python3
@@ -26,17 +27,37 @@
     corefonts
     vistafonts
     obsidian
+    veracrypt
+    gimp
+    geteltorito
     gcc
+    gnumake
+    gdb
     rxvt-unicode
-    llvmPackages_17.clang-unwrapped
     p7zip
     wget
-    dotnet-sdk
+    mono
+    llvmPackages_15.clang-tools
+    python312Packages.pip
+    python312Packages.python-lsp-server # Добавляем python-lsp-server
+
+    #virtualization
+    virt-manager
+    spice-gtk
+
+    #wm
+    polybar
+    feh
+    brightnessctl
+    picom-pijulius
+    rofi
+    sxhkd
+    terminus_font
   ];
 
   # Переменные окружения
   home.sessionVariables = {
-    EDITOR = "nvim";
+    EDITOR = "emacs";
     LANG = "en_US.UTF-8";
   };
 
@@ -44,6 +65,7 @@
   home.file = {
     ".bashrc".text = ''
       export PATH="$HOME/.local/bin:$PATH"
+      xset r rate 300 100
     '';
   };
 }

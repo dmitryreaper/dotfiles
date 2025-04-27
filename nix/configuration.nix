@@ -2,14 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
-
+    
   boot.kernel.sysctl = {
      "net.ipv4.ip_default_ttl" = "65";
   };
@@ -28,23 +28,52 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
-  # # Enable XorgServer
-  services.xserver.enable = true;
-
-  services.xserver.windowManager.xmonad = {
-     enable = true;
-     enableContribAndExtras = true;
-  };
-
-  # Enable lightdm
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.windowManager.xmonad.config = builtins.readFile /home/dima/.xmonad/config.hs;
-
   # Set your time zone.
   time.timeZone = "Europe/Minsk";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
+
+  # service mysql
+  services.mysql.enable = false;
+  services.mysql.package = pkgs.mariadb;
+  services.longview.mysqlPasswordFile = "/run/keys/mysql.password";
+
+  # enable libvirt
+  virtualisation.libvirtd = {
+  enable = true;
+  qemu = {
+    package = pkgs.qemu_kvm;
+    runAsRoot = true;
+    swtpm.enable = true;
+    ovmf = {
+      enable = true;
+      packages = [(pkgs.OVMF.override {
+          secureBoot = true;
+          tpmSupport = true;
+      	}).fd];
+      };
+    };
+  };
+
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
+
+  # disable sudo and enable doas 
+  security.doas.enable = true;
+  security.sudo.enable = false;
+  security.doas.extraRules = [{
+    users = ["dima"];
+    # Optional, retains environment variables while running commands 
+    # e.g. retains your NIX_PATH when applying your config
+    keepEnv = true; 
+    persist = true;  # Optional, only require password verification a single time
+  }];
+
+  # Enable the GNOME Desktop Environment.
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.windowManager.bspwm.enable = true;  
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -52,7 +81,10 @@
     variant = "";
   };
 
-  hardware.bluetooth.enable =  true;
+  # Enable CUPS to print documents.
+  services.printing.enable = true;
+
+  # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -68,13 +100,21 @@
     #media-session.enable = true;
   };
 
+  # Enable touchpad support (enabled default in most desktopManager).
+  # services.xserver.libinput.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.dima = {
     isNormalUser = true;
     description = "dima";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
+    extraGroups = [ "networkmanager" "wheel" "libvirtd"];
+    packages = with pkgs; [
+    #  thunderbird
+    ];
   };
+
+  # Install firefox.
+  # programs.firefox.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -82,69 +122,14 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-	gcc11
-	emacs
-	rxvt-unicode
-	git
-	xmonad-with-packages
-	picom-pijulius
-	polybarFull
-	terminus_font
-	rofi
-	chromium
-	pulseaudio
-	unzip
-	wget
-	btop
-	feh
-	jdk17
-	sbcl
-	gnumake
-	nyxt
-	evince
-	ntfs3g
-	openssh
-	moc
-	ranger
-	flameshot
-	telegram-desktop
-	unityhub
+    emacs
+    coreutils
+    doas
+    ripgrep
+    fd
+    clang
   ];
 
-  # Добавляем LD_LIBRARY_PATH
-  environment.variables.LD_LIBRARY_PATH = lib.makeLibraryPath [
-     pkgs.glib
-     pkgs.gdk-pixbuf
-     pkgs.cairo
-     pkgs.pango
-     pkgs.gtk3
-     pkgs.SDL2
-     pkgs.SDL2_ttf
-     pkgs.SDL2_net
-     pkgs.SDL2_gfx
-     pkgs.SDL2_sound
-     pkgs.SDL2_mixer
-     pkgs.SDL2_image
-     pkgs.SDL2_Pango
-     pkgs.llvmPackages_19.clang-tools
-     pkgs.SDL
-     pkgs.libgcc
-  ];
-
-  services.openssh = {
-  enable = true;
-  ports = [ 22 ];
-  settings = {
-    PasswordAuthentication = true;
-    AllowUsers = null; # Allows all users by default. Can be [ "user1" "user2" ]
-    UseDns = true;
-    X11Forwarding = false;
-    PermitRootLogin = "prohibit-password"; # "yes", "without-password", "prohibit-password", "forced-commands-only",   "no"
-    };
-  };
-  
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -152,11 +137,12 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
-
+  
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
