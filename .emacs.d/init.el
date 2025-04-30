@@ -6,6 +6,7 @@
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
 						 ("org" . "https://orgmode.org/elpa/")
 						 ("elpa" . "https://elpa.gnu.org/packages/")))
+
 (package-initialize)
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
@@ -18,11 +19,10 @@
 (setq inferior-lisp-program "sbcl")
 
 ;;BASIC UI CONFIGURATION
-(setq inhibit-startup-message t)
+;;(setq inhibit-startup-message t)
 (setq initial-buffer-choice nil)
 (setq make-backup-files nil)
 (setq auto-save-default nil)
-(setq org-roam-directory (file-truename "~/OrgRoam/"))
 
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
@@ -31,6 +31,10 @@
 (set-fringe-mode 10)
 (column-number-mode)
 (global-display-line-numbers-mode t)
+(line-number-mode 0)
+
+;; fullscreen
+(add-hook 'window-setup-hook 'toggle-frame-fullscreen)
 
 ;;Blinking cursor
 (setq blink-cursor-blinks 0)
@@ -39,6 +43,9 @@
 (setq-default tab-width          4)
 (setq-default c-basic-offset     4)
 (setq-default standart-indent    4)
+
+;; line hl mode
+(global-hl-line-mode t)
 
 ;;image in org mode size
 (setq org-image-actual-width 700)
@@ -64,9 +71,6 @@
 ;;auto pair
 (electric-pair-mode 1)
 
-;; view image in org mode
-;; (setq org-src-fontify-natively 't)
-;; (setq org-startup-with-inline-images t)
 
 ;; Scroll
 (setq scroll-step 1)
@@ -115,33 +119,6 @@
     (move-beginning-of-line 1)
     (forward-char column)))
 
-;; org mode fonts
-(defun efs/org-font-setup ()
-  ;; Replace list hyphen with dot
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-  ;; Set faces for heading levels
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Hack Nerd Font" :weight 'regular :height (cdr face)))
-
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PACKAGES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,10 +129,10 @@
   :config
   (load-theme 'gruber-darker t))
 
-(use-package doom-modeline
-  :ensure t
-  :config
-  (doom-modeline-mode))
+;; (use-package doom-modeline
+;;   :ensure t
+;;   :config
+;;   (doom-modeline-mode))
 
 ;; multiple cursors
 (use-package multiple-cursors
@@ -177,15 +154,6 @@
   :after ivy
   :init
   (ivy-rich-mode 1))
-
-(use-package counsel
-  :bind (("C-M-j" . 'counsel-switch-buffer)
-         :map minibuffer-local-map
-         ("C-r" . 'counsel-minibuffer-history))
-  :custom
-  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-  :config
-  (counsel-mode 1))
 
 ;; Lsp servers
 (use-package lsp-mode
@@ -225,23 +193,11 @@
 (use-package forge
   :after magit)
 
-;; Startup logo
-(use-package dashboard
-  :ensure t
-  :config
-  (dashboard-setup-startup-hook)
-  (setq dashboard-center-content t)
-  (setq dashboard-items '((recents  . 10)))
-  ;;(projects . 5)
-  ;;(agenda   . 5)))
-  (setq dashboard-banner-logo-title "Welcome to Emacs!"))
-
 ;; ORGmode
 (use-package org
-  :config
-  (setq org-ellipsis "▾")
   :hook
-  (org-mode . yas-global-mode))
+  (org-mode . yas-global-mode)
+  (org-mode . org-modern-mode))
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -249,23 +205,25 @@
 
 (use-package org-roam
   :ensure t
+  :custom
+  (org-roam-directory (file-truename "~/OrgRoam/"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
   :config
-  (org-roam-setup))
-
-(use-package org-bullets
-  :after org
-  :hook (org-mode . org-bullets-mode))
-;;:custom
-;;(org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MAPPING;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; ORG Roam
-(global-set-key (kbd "C-c n l") 'org-roam-buffer-toggle)
-(global-set-key (kbd "C-c n f") 'org-roam-node-find)
-(global-set-key (kbd "C-c n i") 'org-roam-node-insert)
 
 ;; Move window
 (global-set-key (kbd "C-M-p") 'windmove-up)
@@ -335,15 +293,26 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(initial-buffer-choice (lambda nil (get-buffer "*dashboard*")))
+ '(custom-enabled-themes '(doom-ir-black))
+ '(custom-safe-themes
+   '("f4d1b183465f2d29b7a2e9dbe87ccc20598e79738e5d29fc52ec8fb8c576fcfd"
+	 default))
  '(package-selected-packages
-   '(geiser-guile guix org-roam yasnippet org-babel sly multiple-cursors annalist company counsel dashboard doom-modeline forge goto-chg gruber-darker-theme helm-core ivy-prescient ivy-rich llm lsp-java lsp-ui org-bullets org-pdftools org-present queue shell-maker wfnames)))
+   '(company counsel doom-themes forge gruber-darker-theme hl-column-mode
+			 ivy-prescient ivy-rich lsp-java lsp-ui multiple-cursors
+			 org-bullets org-modern org-roam yasnippet)))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(cursor ((t (:background "white"))))
+ '(dired-directory ((t (:foreground "#1d8adb"))))
  '(org-block ((t (:inherit white :extend t))))
  '(org-block-begin-line ((t (:inherit org-meta-line :extend nil))))
  '(sly-mrepl-output-face ((t (:foreground "green")))))
+
+(put 'narrow-to-region 'disabled nil)
+(put 'set-goal-column 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
