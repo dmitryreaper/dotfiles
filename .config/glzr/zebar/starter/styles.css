@@ -1,0 +1,135 @@
+/**
+ * Import the Nerdfonts icon font.
+ * Ref https://www.nerdfonts.com/cheat-sheet for a cheatsheet of available Nerdfonts icons.
+ */
+@import 'https://www.nerdfonts.com/assets/css/webfont.css';
+
+i {
+  color: rgb(200 50 70 / 95%); /* Красные иконки */
+  margin-right: 7px;
+}
+
+body {
+  color: rgb(230 230 230 / 95%);
+  font-family: Hack Nerd Font, Hack Nerd Font;
+  font-size: 14px;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+div,
+span,
+p {
+  cursor: default;
+  user-select: none;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+#root {
+  border-bottom: 1px solid rgb(255 0 0 / 5%);
+  background: #000000;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  height: 100%;
+  padding: 1px;
+  background-color: #000000;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.center {
+  justify-self: center;
+}
+
+.right {
+  justify-self: end;
+}
+
+.binding-mode,
+.tiling-direction,
+.paused-button,
+.network,
+.memory,
+.cpu,
+.battery {
+  margin-right: 20px;
+}
+
+.workspaces {
+  display: flex;
+  align-items: center;
+}
+
+.workspace {
+  background: rgb(255 0 0 / 5%);
+  margin-right: 4px;
+  padding: 4px 8px;
+  color: rgb(255 255 255 / 80%);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.workspace.displayed {
+  background: rgb(255 0 0 / 10%);
+}
+
+.workspace.focused,
+.workspace:hover {
+  background: rgb(255 0 0 / 30%);
+  color: #fff;
+}
+
+.binding-mode,
+.tiling-direction,
+.paused-button {
+  background: rgb(255 0 0 / 10%);
+  color: rgb(255 255 255 / 90%);
+  border-radius: 2px;
+  line-height: 1;
+  padding: 4px 8px;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.binding-mode:hover,
+.tiling-direction:hover,
+.paused-button:hover {
+  background: rgb(255 0 0 / 25%);
+}
+
+.paused-button .paused-icon {
+  color: rgb(255 0 0);
+}
+
+.cpu .high-usage {
+  color: #ff3b5c; /* Ярко-красный для высокой нагрузки */
+}
+
+.battery {
+  position: relative;
+}
+
+.battery .charging-icon {
+  position: absolute;
+  font-size: 7px;
+  left: -8px;
+  top: 3px;
+  color: #ff0033;
+}
