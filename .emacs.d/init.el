@@ -18,6 +18,10 @@
 ;; Replace "sbcl" with the path to your implementation
 (setq inferior-lisp-program "sbcl")
 
+(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+
+
 ;;BASIC UI CONFIGURATION
 ;;(setq inhibit-startup-message t)
 (setq initial-buffer-choice nil)
@@ -34,7 +38,7 @@
 (line-number-mode 0)
 
 ;; fullscreen
-(add-hook 'window-setup-hook 'toggle-frame-fullscreen)
+;;(add-hook 'window-setup-hook 'toggle-frame-fullscreen)
 
 ;;Blinking cursor
 (setq blink-cursor-blinks 0)
@@ -293,14 +297,15 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(doom-ir-black))
+ '(custom-enabled-themes '(gruber-darker))
  '(custom-safe-themes
-   '("f4d1b183465f2d29b7a2e9dbe87ccc20598e79738e5d29fc52ec8fb8c576fcfd"
+   '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd"
+	 "f4d1b183465f2d29b7a2e9dbe87ccc20598e79738e5d29fc52ec8fb8c576fcfd"
 	 default))
  '(package-selected-packages
-   '(company counsel doom-themes forge gruber-darker-theme hl-column-mode
-			 ivy-prescient ivy-rich lsp-java lsp-ui multiple-cursors
-			 org-bullets org-modern org-roam yasnippet)))
+   '(company consult counsel forge gruber-darker-theme ivy-prescient
+			 ivy-rich lsp-java lsp-ui multiple-cursors org-modern
+			 org-roam swiper yasnippet)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
