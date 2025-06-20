@@ -9,7 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
-    
+
   boot.kernel.sysctl = {
      "net.ipv4.ip_default_ttl" = "65";
   };
@@ -18,6 +18,12 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  hardware.bluetooth.enable = true; # enables support for Bluetooth
+  hardware.bluetooth.powerOnBoot = false; # powers up the default Bluetooth controller on boot
+
+  # control light
+  programs.light.enable = true;
+
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -25,55 +31,64 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
+  services.openssh = {
+  enable = true;
+  ports = [ 22 ];
+  settings = {
+    PasswordAuthentication = true;
+    AllowUsers = null; # Allows all users by default. Can be [ "user1" "user2" ]
+    UseDns = true;
+    X11Forwarding = false;
+    PermitRootLogin = "prohibit-password"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
+    };
+  };
+
   # Enable networking
   networking.networkmanager.enable = true;
 
+  # Enable MysqlService
+  services.mysql = {
+    enable = true;
+    package = pkgs.mariadb;
+  };
+
+  # services.tlp.enable = true;
+
+  # Enable Virtualization
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = ["your_username"];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+
   # Set your time zone.
-  time.timeZone = "Europe/Minsk";
+  time.timeZone = "Europe/Moscow";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # service mysql
-  services.mysql.enable = false;
-  services.mysql.package = pkgs.mariadb;
-  services.longview.mysqlPasswordFile = "/run/keys/mysql.password";
-
-  # enable libvirt
-  virtualisation.libvirtd = {
-  enable = true;
-  qemu = {
-    package = pkgs.qemu_kvm;
-    runAsRoot = true;
-    swtpm.enable = true;
-    ovmf = {
-      enable = true;
-      packages = [(pkgs.OVMF.override {
-          secureBoot = true;
-          tpmSupport = true;
-      	}).fd];
-      };
-    };
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "ru_RU.UTF-8";
+    LC_IDENTIFICATION = "ru_RU.UTF-8";
+    LC_MEASUREMENT = "ru_RU.UTF-8";
+    LC_MONETARY = "ru_RU.UTF-8";
+    LC_NAME = "ru_RU.UTF-8";
+    LC_NUMERIC = "ru_RU.UTF-8";
+    LC_PAPER = "ru_RU.UTF-8";
+    LC_TELEPHONE = "ru_RU.UTF-8";
+    LC_TIME = "ru_RU.UTF-8";
   };
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # disable sudo and enable doas 
-  security.doas.enable = true;
-  security.sudo.enable = false;
-  security.doas.extraRules = [{
-    users = ["dima"];
-    # Optional, retains environment variables while running commands 
-    # e.g. retains your NIX_PATH when applying your config
-    keepEnv = true; 
-    persist = true;  # Optional, only require password verification a single time
-  }];
-
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.windowManager.bspwm.enable = true;  
+  # services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.windowManager.xmonad = {
+    enable = true;
+    enableContribAndExtras = true;
+    config = builtins.readFile /home/dima/.xmonad/xmonad.hs;
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -84,8 +99,34 @@
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
+  #Thermal
+  services.thermald.enable = true;
+  services.tlp = {
+      enable = true;
+      settings = {
+        CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+
+        CPU_MIN_PERF_ON_AC = 0;
+        CPU_MAX_PERF_ON_AC = 70;
+        CPU_MIN_PERF_ON_BAT = 0;
+        CPU_MAX_PERF_ON_BAT = 20;
+
+       #Optional helps save long term battery health
+       START_CHARGE_THRESH_BAT0 = 40; # 40 and below it starts to charge
+       STOP_CHARGE_THRESH_BAT0 = 80; # 80 and above it stops charging
+
+      };
+  };
+
+  # Enable Flatpak
+  # services.flatpak.enable = true;
+
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -107,14 +148,11 @@
   users.users.dima = {
     isNormalUser = true;
     description = "dima";
-    extraGroups = [ "networkmanager" "wheel" "libvirtd"];
+    extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
     #  thunderbird
     ];
   };
-
-  # Install firefox.
-  # programs.firefox.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -122,12 +160,45 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    emacs
-    coreutils
-    doas
-    ripgrep
-    fd
-    clang
+	emacs
+	vscode
+	wget
+	links2
+	keepassxc
+	telegram-desktop
+	libreoffice
+	chromium
+	corefonts
+	times-newer-roman
+	vistafonts
+	nautilus
+	git
+	spotify
+
+	#haskell
+	ghc
+	haskell-language-server
+	
+	#xmonad
+	xmonad-with-packages
+	haskellPackages.xmonad-contrib
+	polybarFull
+	feh
+	yazi
+	brightnessctl
+	alacritty
+	flameshot
+	rofi
+	picom-pijulius
+	pulseaudioFull
+	
+	# monitor
+	htop
+	btop
+
+	#osinfo
+	osinfo-db
+	libosinfo
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -142,7 +213,7 @@
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
-  
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
@@ -155,6 +226,5 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.11"; # Did you read the comment?
-
+  system.stateVersion = "25.05"; # Did you read the comment?
 }
