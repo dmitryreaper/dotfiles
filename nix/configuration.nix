@@ -13,16 +13,75 @@
   boot.kernel.sysctl = {
      "net.ipv4.ip_default_ttl" = "65";
   };
-  
+
+  # Enable PostgreSQL
+  services.postgresql = {
+    enable = true;
+    package = pkgs.postgresql_15;
+    
+    identMap = ''
+    # ArbitraryMapName systemUser DBUser
+       superuser_map      root      postgres
+       superuser_map      postgres  postgres
+       # Let other names login as themselves
+       superuser_map      /^(.*)$   \1
+    '';
+  };
+
+  #########NVIDIA DRIVER# ##########
+  # Enable OpenGL
+  hardware.graphics = {
+    enable = true;
+  };
+
+  services.xserver.videoDrivers = [
+    "modesetting"  # example for Intel iGPU; use "amdgpu" here instead if your iGPU is AMD
+    "nvidia"
+  ];
+
+  hardware.nvidia.prime = {
+		# Make sure to use the correct Bus ID values for your system!
+		intelBusId = "PCI:0:2:0";
+		nvidiaBusId = "PCI:14:0:0";
+                # amdgpuBusId = "PCI:54:0:0"; For AMD GPU
+  };
+
+  hardware.nvidia = {
+
+    # Modesetting is required.
+    modesetting.enable = true;
+
+    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+    # Enable this if you have graphical corruption issues or application crashes after waking
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
+    # of just the bare essentials.
+    powerManagement.enable = false;
+
+    # Fine-grained power management. Turns off GPU when not in use.
+    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    powerManagement.finegrained = false;
+
+    # Use the NVidia open source kernel module (not to be confused with the
+    # independent third-party "nouveau" open source driver).
+    # Support is limited to the Turing and later architectures. Full list of 
+    # supported GPUs is at: 
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+    # Only available from driver 515.43.04+
+    open = false;
+
+    # Enable the Nvidia settings menu,
+	# accessible via `nvidia-settings`.
+    nvidiaSettings = true;
+
+    # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+  };
+
+  ########################################
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  hardware.bluetooth.enable = true; # enables support for Bluetooth
-  hardware.bluetooth.powerOnBoot = false; # powers up the default Bluetooth controller on boot
-
-  # control light
-  programs.light.enable = true;
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -31,64 +90,27 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  services.openssh = {
-  enable = true;
-  ports = [ 22 ];
-  settings = {
-    PasswordAuthentication = true;
-    AllowUsers = null; # Allows all users by default. Can be [ "user1" "user2" ]
-    UseDns = true;
-    X11Forwarding = false;
-    PermitRootLogin = "prohibit-password"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
-    };
-  };
-
   # Enable networking
   networking.networkmanager.enable = true;
 
-  # Enable MysqlService
-  services.mysql = {
-    enable = true;
-    package = pkgs.mariadb;
-  };
-
-  # services.tlp.enable = true;
-
-  # Enable Virtualization
-  programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = ["your_username"];
-  virtualisation.libvirtd.enable = true;
-  virtualisation.spiceUSBRedirection.enable = true;
-
   # Set your time zone.
-  time.timeZone = "Europe/Moscow";
+  time.timeZone = "Europe/Minsk";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "ru_RU.UTF-8";
-    LC_IDENTIFICATION = "ru_RU.UTF-8";
-    LC_MEASUREMENT = "ru_RU.UTF-8";
-    LC_MONETARY = "ru_RU.UTF-8";
-    LC_NAME = "ru_RU.UTF-8";
-    LC_NUMERIC = "ru_RU.UTF-8";
-    LC_PAPER = "ru_RU.UTF-8";
-    LC_TELEPHONE = "ru_RU.UTF-8";
-    LC_TIME = "ru_RU.UTF-8";
-  };
+  # Enable Virtualization
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = ["dima"];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.windowManager.xmonad = {
-    enable = true;
-    enableContribAndExtras = true;
-    config = builtins.readFile /home/dima/.xmonad/xmonad.hs;
-  };
+  services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -98,32 +120,6 @@
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
-
-  #Thermal
-  services.thermald.enable = true;
-  services.tlp = {
-      enable = true;
-      settings = {
-        CPU_SCALING_GOVERNOR_ON_AC = "performance";
-        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-
-        CPU_MIN_PERF_ON_AC = 0;
-        CPU_MAX_PERF_ON_AC = 70;
-        CPU_MIN_PERF_ON_BAT = 0;
-        CPU_MAX_PERF_ON_BAT = 20;
-
-       #Optional helps save long term battery health
-       START_CHARGE_THRESH_BAT0 = 40; # 40 and below it starts to charge
-       STOP_CHARGE_THRESH_BAT0 = 80; # 80 and above it stops charging
-
-      };
-  };
-
-  # Enable Flatpak
-  # services.flatpak.enable = true;
 
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
@@ -157,48 +153,17 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Enable Flatpak
+  services.flatpak.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-	emacs
-	vscode
-	wget
-	links2
-	keepassxc
-	telegram-desktop
-	libreoffice
-	chromium
-	corefonts
-	times-newer-roman
-	vistafonts
-	nautilus
-	git
-	spotify
-
-	#haskell
-	ghc
-	haskell-language-server
-	
-	#xmonad
-	xmonad-with-packages
-	haskellPackages.xmonad-contrib
-	polybarFull
-	feh
-	yazi
-	brightnessctl
-	alacritty
-	flameshot
-	rofi
-	picom-pijulius
-	pulseaudioFull
-	
-	# monitor
-	htop
-	btop
-
-	#osinfo
-	osinfo-db
-	libosinfo
+  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  #  wget
+    chromium
+    emacs
+    git
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -227,4 +192,5 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
+
 }
