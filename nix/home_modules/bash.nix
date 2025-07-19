@@ -4,6 +4,11 @@
     shellAliases = {
       hr = "home-manager switch";
       hg = "home-manager generations";
+
+      sr = "sudo nixos-rebuild switch";
+      sg = "nixos-rebuild list-generations";
+
+      em = "emacs -nw";
     };
     
     bashrcExtra = ''
