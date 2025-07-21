@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: method
-# key: m
-# --
-public ${1:void} ${2:methodName}(${3:String arg}) {
-    $0
-}
