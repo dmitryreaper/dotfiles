@@ -1,0 +1,34 @@
+{ pkgs, ... }:
+
+{
+  home.packages = [
+    #applications
+    pkgs.chromium
+    pkgs.alacritty
+    pkgs.zed-editor
+    pkgs.telegram-desktop
+    pkgs.spotify
+    pkgs.obsidian
+
+    #progs lang
+    pkgs.go
+    pkgs.gopls
+
+    #develop
+    pkgs.qtcreator
+    #pkgs.qt6.full
+    pkgs.libsForQt5.full
+    pkgs.gnumake
+    pkgs.cmake
+    pkgs.unzip
+    #pkgs.gcc
+    pkgs.clang
+    pkgs.ripgrep
+    pkgs.clang-tools
+
+    #gnome
+    pkgs.gnome-tweaks
+    pkgs.gnome-shell
+    pkgs.gnome-themes-extra
+  ];
+}

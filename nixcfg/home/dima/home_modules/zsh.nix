@@ -1,0 +1,17 @@
+{
+  programs.zsh = {
+    enable = true;
+    enableCompletions = true;
+    autosuggestions = {
+      enable = true;
+    };
+    syntaxHighlighting = {
+      enable = true;
+    };
+    shellAliases = {
+      ll = "ls -l";
+      sr = "sudo nixos-rebuild switch";
+    };
+    history.size = 10000;
+  };
+}
