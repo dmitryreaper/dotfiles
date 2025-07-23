@@ -1,6 +1,6 @@
 #!/bin/sh
-wget -q -O /home/dima/Prog/dotfiles/scripts/minsk https://myfin.by/currency/minsk
-FILE="/home/dima/Prog/dotfiles/scripts/minsk"
+wget -q -O /home/dima/Source/dotfiles/scripts/minsk https://myfin.by/currency/minsk
+FILE="/home/dima/Source/dotfiles/scripts/minsk"
 PATTERN='<div class="course-brief-info__b"><span class="accent">([0-9.]+)</span>'
 COUNT=1
 VALUES=""

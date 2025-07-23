@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec /home/dima/Prog/dotfiles/scripts/money.sh | awk '{print $1 "/" $2}'
+exec /home/dima/Source/dotfiles/scripts/money.sh | awk '{print $1 "/" $2}'
