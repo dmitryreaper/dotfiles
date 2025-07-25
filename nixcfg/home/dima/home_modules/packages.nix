@@ -5,8 +5,8 @@
     #applications
     pkgs.chromium
     pkgs.alacritty
-    pkgs.zed-editor
     pkgs.telegram-desktop
+    pkgs.obs-studio
     pkgs.spotify
     pkgs.obsidian
 
@@ -23,12 +23,27 @@
     pkgs.unzip
     #pkgs.gcc
     pkgs.clang
+    pkgs.gdb
     pkgs.ripgrep
     pkgs.clang-tools
+
+    #system tools
+    pkgs.killall
 
     #gnome
     pkgs.gnome-tweaks
     pkgs.gnome-shell
     pkgs.gnome-themes-extra
+
+    #xmonad
+    pkgs.wget
+    pkgs.curl
+    pkgs.picom
+    pkgs.polybar
+    pkgs.flameshot
+    pkgs.feh
+    pkgs.pulseaudio
+    pkgs.polybar-pulseaudio-control
+    pkgs.rofi
   ];
 }
