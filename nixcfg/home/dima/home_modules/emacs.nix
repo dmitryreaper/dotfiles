@@ -18,15 +18,18 @@ in
       ivy-rich
       lsp-mode
       yasnippet
+      yasnippet-snippets
       lsp-ui
       counsel
       ivy-prescient
       magit
       forge
-      org
-      org-roam
+      go-mode
       nix-mode
+      treemacs
+      treemacs-all-the-icons
       haskell-mode
+      ace-window
     ]);
   };
 }
